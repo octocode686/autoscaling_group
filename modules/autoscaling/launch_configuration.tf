@@ -66,3 +66,19 @@ resource "aws_autoscaling_attachment" "asg_attachment_lb" {
   autoscaling_group_name = aws_autoscaling_group.asg-to.id
   lb_target_group_arn    = aws_lb_target_group.alb-target.arn
 }
+
+resource "aws_cloudwatch_metric_alarm" "ram_usage_alarm" {
+  alarm_name          = "ram-usage-alarm"
+  comparison_operator = "GreaterThanOrEqualToThreshold"
+  evaluation_periods  = 2
+  metric_name         = "MemoryUsed"
+  namespace           = "AWS/EC2"
+  period              = 60
+  statistic           = "Average"
+  threshold           = 70
+  alarm_description   = "Alarm triggered when RAM usage exceeds 70%"
+  alarm_actions       = [aws_autoscaling_policy.autoscaling_policy.arn]
+  dimensions = {
+    AutoScalingGroupName = aws_autoscaling_group.asg-to.name
+  }
+}
